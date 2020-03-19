@@ -4,11 +4,36 @@ from django.urls import reverse
 # Create your models here.
 class Post(models.Model):
     author=models.ForeignKey('auth.User')
-    title=models.CharField(max_length='45')
+    title=models.CharField(max_length=45)
     text=models.TextField()
     published_date=models.DateTimeField(blank=True,null=True)
     create_date=models.DateTimeField(default=timezone.now())
 
     def publish(self):
-        return self.published_date= timezone.now()
+        self.published_date=timezone.now()
         self.save()
+
+    def get_absolute_url(self):
+        return reverse("post_detail",kwargs={'pk':self.pk})
+
+    def approve_comments(self):
+        return self.comments.filter(approved_comment=True)
+
+    def __str__(self):
+        return self.title
+class Comment(models.Model):
+    post=models.ForeignKey('blog.Post',related_name="comments")
+    author=models.CharField(max_length=567)
+    create_date=models.DateTimeField(default=timezone.now())
+    approved_comment=models.BooleanField(default=False)
+    text=models.TextField()
+
+    def approve(self):
+        self.approved_comment=True
+        self.save()
+
+    def get_absolute_url(self):
+        return reverse('post_list')
+        
+    def __str__(self):
+        return self.text
